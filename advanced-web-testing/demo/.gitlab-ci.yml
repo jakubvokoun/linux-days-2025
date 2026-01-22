@@ -1,0 +1,14 @@
+image: docker:latest
+
+services:
+  - docker:dind
+
+test:
+  script:
+    - apk add gzip
+    - gunzip -c ./ping-cms-app.tar.gz | docker load
+    - gunzip -c ./ping-cms-playwright.tar.gz | docker load
+    - docker images
+    - docker compose -f compose-ci.yml up -d web-app
+    - docker compose -f compose-ci.yml run playwright-tests
+    - docker compose -f compose-ci.yml down

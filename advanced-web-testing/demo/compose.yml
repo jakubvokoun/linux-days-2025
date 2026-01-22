@@ -1,0 +1,28 @@
+services:
+  web-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.app
+    networks:
+      - playwright-network
+    ports:
+      - "8000:8000"
+  playwright-tests:
+    build:
+      context: .
+      dockerfile: Dockerfile.playwright
+    depends_on:
+      - web-app
+    volumes:
+      - ./tests:/app/tests
+      - ./test-results:/app/test-results
+      - ./playwright-report:/app/playwright-report
+    environment:
+      - BASE_URL=http://web-app:8000
+    networks:
+      - playwright-network
+    command: python -m pytest tests/ --html=test-results/report.html --self-contained-html
+
+networks:
+  playwright-network:
+    driver: bridge
